@@ -16,7 +16,7 @@ jobs:
 
       - name: Extract Chatly ZIP
         run: |
-          echo "=== ZIP DOSYALARI ==="
+          echo "=== ZIP DOSYASI ==="
           ls -lh *.zip
 
           rm -rf extracted_project
@@ -24,7 +24,7 @@ jobs:
 
           unzip -o chatly_fixed.zip -d extracted_project
 
-          echo "=== ÇIKARILAN PROJE ==="
+          echo "=== PROJECT ==="
           ls -la extracted_project
 
       - name: Set up JDK 17
@@ -38,6 +38,25 @@ jobs:
         with:
           gradle-version: '9.3.1'
 
+      - name: Create debug keystore
+        working-directory: extracted_project
+        run: |
+          echo "Creating debug.keystore..."
+
+          keytool -genkeypair \
+            -v \
+            -keystore debug.keystore \
+            -storepass android \
+            -alias androiddebugkey \
+            -keypass android \
+            -keyalg RSA \
+            -keysize 2048 \
+            -validity 10000 \
+            -dname "CN=Android Debug,O=Android,C=US"
+
+          echo "=== DEBUG KEYSTORE ==="
+          ls -lh debug.keystore
+
       - name: Check Android project
         working-directory: extracted_project
         run: |
@@ -47,8 +66,8 @@ jobs:
           echo "=== APP ==="
           ls -la app
 
-          echo "=== SETTINGS ==="
-          cat settings.gradle.kts
+          echo "=== KEYSTORE ==="
+          ls -lh debug.keystore
 
       - name: Build Debug APK
         working-directory: extracted_project
