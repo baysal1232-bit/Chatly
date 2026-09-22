@@ -11,8 +11,21 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout project
+      - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Extract Chatly ZIP
+        run: |
+          echo "=== ZIP DOSYALARI ==="
+          ls -lh *.zip
+
+          rm -rf extracted_project
+          mkdir extracted_project
+
+          unzip -o chatly_fixed.zip -d extracted_project
+
+          echo "=== ÇIKARILAN PROJE ==="
+          ls -la extracted_project
 
       - name: Set up JDK 17
         uses: actions/setup-java@v5
@@ -25,25 +38,31 @@ jobs:
         with:
           gradle-version: '9.3.1'
 
-      - name: Check project
+      - name: Check Android project
+        working-directory: extracted_project
         run: |
           echo "=== PROJECT ==="
           ls -la
+
           echo "=== APP ==="
           ls -la app
 
+          echo "=== SETTINGS ==="
+          cat settings.gradle.kts
+
       - name: Build Debug APK
+        working-directory: extracted_project
         run: |
           gradle assembleDebug --no-daemon --stacktrace
 
       - name: Find APK
         run: |
-          echo "=== APK FILES ==="
-          find . -type f -name "*.apk" -print
+          echo "=== APK DOSYALARI ==="
+          find extracted_project -type f -name "*.apk" -print
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: Chatly-debug-APK
-          path: app/build/outputs/apk/debug/*.apk
+          path: extracted_project/app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
