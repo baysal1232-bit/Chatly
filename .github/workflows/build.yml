@@ -1,4 +1,4 @@
-name: Build Android APK from Zip
+name: Build Chatly APK
 
 on:
   push:
@@ -24,29 +24,19 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
+          cache: gradle
 
       - name: Set up Gradle 9.3.1
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '9.3.1'
 
-      - name: Check project
-        run: |
-          cd extracted_project
-          echo "Project files:"
-          ls -la
-          echo "Gradle version:"
-          gradle --version
-
       - name: Build Debug APK
-        run: |
-          cd extracted_project
-          gradle assembleDebug --no-daemon
+        working-directory: extracted_project
+        run: gradle assembleDebug --no-daemon --stacktrace
 
       - name: Find APK
-        run: |
-          echo "APK files:"
-          find extracted_project -type f -name "*.apk"
+        run: find extracted_project -type f -name "*.apk" -print
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
